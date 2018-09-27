@@ -1,0 +1,48 @@
+version: "2"
+
+services:
+  kibana:
+    image: docker.elastic.co/kibana/kibana:6.4.1
+    volumes:
+      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+    ports:
+      - 5601:5601
+    networks:
+      elastic:
+        aliases:
+          - kibana.docker
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:6.4.1
+    volumes:
+      - ./logs:/tmp/logs
+      - ./logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    networks:
+      elastic:
+        aliases:
+          - logstash.docker
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.4.1
+    volumes:
+      - ./elasticsearch.yml:/usr/share/kibana/config/elasticsearch.yml
+      - es-data:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      elastic:
+        aliases:
+          - elasticsearch.docker
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    environment:
+      discovery.type: single-node
+
+networks:
+  elastic:
+
+volumes:
+  es-data:
